@@ -11,7 +11,7 @@ class ChangePasswordWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setMinimumSize(300, 200)  # Минимальный размер
+        self.setMinimumSize(300, 200)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         layout = QVBoxLayout()
@@ -44,11 +44,11 @@ class ChangePasswordWidget(QWidget):
         self.change_button.clicked.connect(self.handle_change_password)
         layout.addWidget(self.change_button)
 
-        layout.setStretch(0, 1)  # Заголовок
-        layout.setStretch(1, 2)  # Текущий пароль
-        layout.setStretch(2, 2)  # Новый пароль
-        layout.setStretch(3, 2)  # Подтверждение пароля
-        layout.setStretch(4, 1)  # Кнопка
+        layout.setStretch(0, 1)
+        layout.setStretch(1, 2)
+        layout.setStretch(2, 2)
+        layout.setStretch(3, 2)
+        layout.setStretch(4, 1)
 
         self.setLayout(layout)
 

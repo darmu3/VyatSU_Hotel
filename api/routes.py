@@ -74,7 +74,7 @@ def login(user: UserLogin):
             cursor.close()
             conn.close()
             remaining_attempts = 3 - failed_attempts
-            raise HTTPException(status_code=401, detail=f"Вы ввели неверный логин или пароль. Пожалуйста проверьте ещё раз введенные данные. Осталось {remaining_attempts} попыток.")
+            raise HTTPException(status_code=401, detail=f"Вы ввели неверный пароль. Пожалуйста проверьте ещё раз введенные данные. Осталось {remaining_attempts} попыток.")
 
     cursor.execute("""
         UPDATE users
@@ -290,52 +290,3 @@ def get_user(userid: int):
         "is_blocked": row[7],
         "failed_attempts": row[8]
     }
-
-@router.put("/admin/update_user")
-def update_user(user: UpdateUser):
-    """
-    Эндпоинт для обновления данных пользователя.
-    Обновляются ФИО, логин, пароль, позиция, а также is_blocked и failed_attempts.
-    Если новый логин занят другим пользователем, возвращается ошибка.
-    """
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT userid FROM users WHERE userid = %s", (user.userid,))
-    if cursor.fetchone() is None:
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-    cursor.execute("SELECT userid FROM users WHERE login = %s AND userid != %s", (user.login, user.userid))
-    if cursor.fetchone() is not None:
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=400, detail="Пользователь с таким логином уже существует")
-
-    cursor.execute("""
-        UPDATE users
-        SET surname = %s,
-            name = %s,
-            patronymic = %s,
-            login = %s,
-            password = %s,
-            positionid = %s,
-            is_blocked = %s,
-            failed_attempts = %s
-        WHERE userid = %s
-    """, (
-        user.surname,
-        user.name,
-        user.patronymic,
-        user.login,
-        user.password,
-        user.positionid,
-        user.is_blocked,
-        user.failed_attempts,
-        user.userid
-    ))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"message": "Пользователь успешно обновлен"}

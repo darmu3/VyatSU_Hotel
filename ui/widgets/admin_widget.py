@@ -85,7 +85,7 @@ class AdminWidget(QWidget):
         form.addRow("Отчество:", self.upd_patronymic)
         form.addRow("Логин:", self.upd_login)
         form.addRow("Пароль:", self.upd_password)
-        form.addRow("Роль:", self.upd_positionid)  # Меняем на "Роль"
+        form.addRow("Роль:", self.upd_positionid)
         form.addRow("Блокировка:", self.upd_is_blocked)
         form.addRow("Неудачных попыток:", self.upd_failed_attempts)
 
@@ -145,6 +145,8 @@ class AdminWidget(QWidget):
             response = requests.get(url)
             if response.status_code == 200:
                 data = response.json()
+
+                # Заполняем поля
                 self.upd_surname.setText(data.get("surname", ""))
                 self.upd_name.setText(data.get("name", ""))
                 self.upd_patronymic.setText(data.get("patronymic", ""))
@@ -153,18 +155,26 @@ class AdminWidget(QWidget):
                 self.upd_failed_attempts.setText(str(data.get("failed_attempts", 0)))
                 self.upd_is_blocked.setChecked(data.get("is_blocked", False))
 
-                # Выбираем соответствующую роль в выпадающем списке
+                # Перезаполняем позиции, если вдруг список пуст
+                if self.upd_positionid.count() == 0:
+                    self.load_positions()  # Вызов функции загрузки позиций, если список пуст
+
+                # Устанавливаем текущий positionid
                 positionid = data.get("positionid", None)
-                if positionid:
+                if positionid is not None:
                     index = self.upd_positionid.findData(positionid)
                     if index != -1:
                         self.upd_positionid.setCurrentIndex(index)
+                    else:
+                        self.upd_positionid.setCurrentIndex(0)  # Если не найден, выбираем первый элемент
 
+                # Разблокируем поля для редактирования
                 for widget in (self.upd_surname, self.upd_name, self.upd_patronymic,
-                               self.upd_login, self.upd_password, self.upd_positionid,
-                               self.upd_failed_attempts, self.update_btn):
+                               self.upd_login, self.upd_password, self.upd_failed_attempts, self.update_btn):
                     widget.setDisabled(False)
                 self.upd_is_blocked.setDisabled(False)
+                self.upd_positionid.setDisabled(False)  # Делаем `QComboBox` доступным
+
             else:
                 error_detail = response.json().get("detail", "Ошибка при загрузке данных пользователя")
                 QMessageBox.warning(self, "Ошибка", error_detail)
@@ -187,7 +197,7 @@ class AdminWidget(QWidget):
         self.upd_is_blocked.setDisabled(True)
 
     def add_user_handler(self):
-        positionid = self.add_positionid.currentData()  # Берем ID из выпадающего списка
+        positionid = self.add_positionid.currentData()
 
         data = {
             "surname": self.add_surname.text().strip(),
@@ -223,7 +233,7 @@ class AdminWidget(QWidget):
             return
 
         try:
-            positionid = int(self.upd_positionid.text().strip())
+            positionid = self.upd_positionid.currentData()
         except ValueError:
             QMessageBox.warning(self, "Ошибка", "PositionID должен быть числом")
             return

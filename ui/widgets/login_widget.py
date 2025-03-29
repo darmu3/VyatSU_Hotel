@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QLab
 from PySide6.QtCore import Signal
 
 class LoginWidget(QWidget):
-    login_success = Signal(int, int)  # Передаем user_id и position_id
+    login_success = Signal(int, int)
     first_login_required = Signal(int)
 
     def __init__(self):
@@ -11,7 +11,7 @@ class LoginWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setMinimumSize(300, 150)  # Минимальный размер, чтобы не сжимался слишком сильно
+        self.setMinimumSize(300, 150)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         layout = QVBoxLayout()
